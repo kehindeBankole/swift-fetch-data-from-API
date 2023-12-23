@@ -16,9 +16,12 @@ enum MyError: Error {
 case badParsing
 case badRequest
 }
+
 struct ContentView: View {
     @State private var posts: [Post] = []
     @State private var isLoading = false
+    @State private var isError = false
+
     private func fetchData() async throws -> Any {
         // Parse URL
         guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else {
@@ -39,7 +42,8 @@ struct ContentView: View {
             return decodedData
         } catch {
             // Print errors
-          
+          isError = true
+            isLoading = false
             throw MyError.badRequest
         }
     }
@@ -47,11 +51,14 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if(isLoading){
+              
                 ProgressView("Loading...")
                     .progressViewStyle(CircularProgressViewStyle())
                     .padding()
                 
-            }else{
+            }else if(isError){
+                Text("Error getting data")
+            } else{
                 List(posts){post in
                     Text(post.title).padding(.vertical,20).swipeActions(content: {
                         Button(role: .destructive, action: {
@@ -71,8 +78,4 @@ struct ContentView: View {
         .padding()
     }
     
-}
-
-#Preview {
-    ContentView()
 }
